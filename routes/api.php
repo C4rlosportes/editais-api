@@ -5,9 +5,20 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InscricaoController;
 use App\Http\Controllers\OpmController;
 use App\Http\Controllers\HistoricoController;
+use App\Http\Controllers\AuthController;
 
-Route::post('/editais/{edital}/inscricoes', [InscricaoController::class, 'store']); #Aqui está sendo usado o Route Model Binding para o Edital, então o parâmetro {edital} será automaticamente
-#resolvido para uma instância do modelo Edital com base no ID fornecido na URL.
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1'); #Limita o número de tentativas de login para 5 por minuto para prevenir ataques de força bruta.
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+}); #Agrupa as rotas que requerem autenticação via Sanctum. As rotas dentro deste grupo só podem ser acessadas por usuários autenticados.
+
+Route::post(
+    '/editais/{edital}/inscricoes',
+    [InscricaoController::class, 'store']
+)->middleware('auth:sanctum'); #Cria uma nova inscrição para um edital específico, chamando o método store do InscricaoController. O parâmetro {edital} será resolvido para uma instância do modelo Edital com base no ID fornecido na URL. Esta rota requer autenticação via Sanctum.
 
 Route::get('/inscricoes/{inscricao}', [InscricaoController::class, 'show']); #Aqui está sendo usado o Route Model Binding para a Inscrição, então o parâmetro {inscricao} será automaticamente
 #resolvido para uma instância do modelo Inscricao com base no ID fornecido na URL.

@@ -35,7 +35,21 @@ class InscricaoController extends Controller
         Edital $edital,
         InscricaoService $inscricaoService
     ) {
-        $militar = Militar::findOrFail(4);
+        $usuario = $request->user();
+
+        if ($usuario->perfil_acesso !== 'MILITAR') {
+            return response()->json([
+                'message' => 'Somente militares podem criar inscrições.',
+            ], 403);
+        }
+
+        $militar = $usuario->militar;
+
+        if (!$militar) {
+            return response()->json([
+                'message' => 'A conta não está vinculada a um cadastro de militar.',
+            ], 403);
+        }
 
         $inscricao = $inscricaoService->criar(
             $request->validated(),

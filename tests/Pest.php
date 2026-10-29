@@ -1,6 +1,10 @@
 <?php
 
 use Tests\TestCase;
+use App\Models\Militar;
+use App\Models\Opm;
+use App\Models\User;
+use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +18,7 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
 
 /*
@@ -43,7 +47,88 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+
+/**
+ * Cria uma conta de teste com perfil SME.
+ */
+function criarUsuarioSme(array $atributos = []): User
 {
-    // ..
+    $identificador = (string) Str::uuid();
+
+    $usuario = User::factory()->create([
+        'name' => $atributos['name'] ?? 'Usuário SME de teste',
+        'email' => $atributos['email']
+            ?? "sme-{$identificador}@example.test",
+    ]);
+
+    $usuario->forceFill([
+        'perfil_acesso' => 'SME',
+    ])->save();
+
+    return $usuario;
+}
+
+/**
+ * Cria uma conta de militar e vincula seu cadastro funcional.
+ *
+ * @return array{user: User, militar: Militar}
+ */
+function criarUsuarioMilitar(Opm $opm, array $atributos = []): array
+{
+    $identificador = (string) Str::uuid();
+    $nome = $atributos['nome'] ?? 'Militar de teste';
+
+    $usuario = User::factory()->create([
+        'name' => $nome,
+        'email' => $atributos['email']
+            ?? "militar-{$identificador}@example.test",
+    ]);
+
+    $usuario->forceFill([
+        'perfil_acesso' => 'MILITAR',
+    ])->save();
+
+    $militar = Militar::create([
+        'usuario_keycloak' => "teste-{$identificador}",
+        'perfil' => 'MILITAR',
+        'id_funcional' => 'MIL-' .
+            strtoupper(str_replace('-', '', $identificador)),
+        'nome' => $nome,
+        'posto_graduacao' => $atributos['posto_graduacao'] ?? 'Soldado',
+        'opm_origem_id' => $opm->id,
+        'municipio' => $opm->municipio,
+    ]);
+
+    $militar->user_id = $usuario->id;
+    $militar->save();
+
+    return [
+        'user' => $usuario,
+        'militar' => $militar,
+    ];
+}
+
+/**
+ * Cria uma conta de acesso e a vincula a um militar existente.
+ */
+function vincularUsuarioAoMilitar(
+    Militar $militar,
+    array $atributos = []
+): User {
+    $identificador = (string) Str::uuid();
+
+    $usuario = User::factory()->create([
+        'name' => $atributos['name'] ?? $militar->nome,
+        'email' => $atributos['email']
+            ?? "militar-{$identificador}@example.test",
+    ]);
+
+    $usuario->forceFill([
+        'perfil_acesso' => 'MILITAR',
+    ])->save();
+
+    $militar->user_id = $usuario->id;
+    $militar->save();
+
+    return $usuario;
 }

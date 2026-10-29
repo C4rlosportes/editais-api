@@ -11,6 +11,28 @@ use App\Models\Historico;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    $opm = Opm::create([
+        'codigo' => 'OPM-AUTH-TESTE',
+        'nome' => 'OPM de Autenticação',
+        'municipio' => 'Porto Alegre',
+    ]);
+
+    $militar = Militar::create([
+        'usuario_keycloak' => 'usuario-auth-teste',
+        'perfil' => 'MILITAR',
+        'id_funcional' => 'MIL-AUTH-TESTE-001',
+        'nome' => 'Militar Autenticado de Teste',
+        'posto_graduacao' => 'Soldado',
+        'opm_origem_id' => $opm->id,
+        'municipio' => $opm->municipio,
+    ]);
+
+    $usuario = vincularUsuarioAoMilitar($militar);
+
+    $this->actingAs($usuario, 'sanctum');
+});
+
 test('as migrations funcionam no banco de teste', function () {
     expect(Schema::hasTable('editais'))->toBeTrue()
         ->and(Schema::hasTable('inscricoes'))->toBeTrue()
@@ -94,7 +116,7 @@ test('um militar consegue criar uma inscrição com escolhas e conferências pen
     // 8. Verificar se a inscrição foi salva
     $this->assertDatabaseHas('inscricoes', [
         'edital_id' => $edital->id,
-        'militar_id' => 4,
+        'militar_id' => auth('sanctum')->user()->militar->id,
         'situacao' => 'SUBMETIDA',
         'version' => 1,
     ]);
@@ -134,7 +156,7 @@ test('um militar consegue criar uma inscrição com escolhas e conferências pen
         ->toBe($response->json('data.protocolo'));
 
     expect($historico->dados_posteriores['militar_id'])
-        ->toBe(4);
+        ->toBe(auth('sanctum')->user()->militar->id);
 
     expect($historico->dados_posteriores['situacao'])
         ->toBe('SUBMETIDA');
