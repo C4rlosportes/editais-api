@@ -1,0 +1,16 @@
+{
+  "titulo": "Tentativa de alterar edital aberto",
+  "descricao": "Teste do bloqueio de edição após abertura.",
+  "max_opcoes": 1,
+  "requisitos": [
+    {
+      "descricao": "Requisito de teste."
+    }
+  ],
+  "destinos": [
+    {
+      "opm_id": 1,
+      "vagas": 2
+    }
+  ]
+}
