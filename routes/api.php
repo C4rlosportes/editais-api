@@ -20,8 +20,10 @@ Route::post(
     [InscricaoController::class, 'store']
 )->middleware('auth:sanctum'); #Cria uma nova inscrição para um edital específico, chamando o método store do InscricaoController. O parâmetro {edital} será resolvido para uma instância do modelo Edital com base no ID fornecido na URL. Esta rota requer autenticação via Sanctum.
 
-Route::get('/inscricoes/{inscricao}', [InscricaoController::class, 'show']); #Aqui está sendo usado o Route Model Binding para a Inscrição, então o parâmetro {inscricao} será automaticamente
-#resolvido para uma instância do modelo Inscricao com base no ID fornecido na URL.
+Route::get(
+    '/inscricoes/{inscricao}',
+    [InscricaoController::class, 'show']
+)->middleware('auth:sanctum'); #Consulta uma inscrição específica, chamando o método show do InscricaoController. O parâmetro {inscricao} será resolvido para uma instância do modelo Inscricao com base no ID fornecido na URL. Esta rota requer autenticação via Sanctum.
 
 Route::get('/editais', [EditalController::class, 'index']); #Lista os editais cadastrados, chamando o método index do EditalController.
 
@@ -29,20 +31,20 @@ Route::get('/editais/{edital}', [EditalController::class, 'show']); #Consulta um
 
 Route::get(
     '/editais/{edital}/inscricoes',
-    [InscricaoController::class, 'index'] #Lista as inscrições de um edital específico, chamando o método index do InscricaoController. O parâmetro {edital} será resolvido para uma instância do modelo Edital com base no ID fornecido na URL.
-);
+    [InscricaoController::class, 'index']
+)->middleware('auth:sanctum'); #Lista as inscrições de um edital específico, chamando o método index do InscricaoController. O parâmetro {edital} será resolvido para uma instância do modelo Edital com base no ID fornecido na URL. Esta rota requer autenticação via Sanctum.
 
 Route::patch(
     '/inscricoes/{inscricao}/conferencias/{conferencia}',
-    [InscricaoController::class, 'atualizarConferencia'] #Atualiza uma conferência específica de uma inscrição, chamando o método atualizarConferencia do InscricaoController. Os parâmetros {inscricao} e {conferencia} serão resolvidos para instâncias dos modelos Inscricao e Conferencia, respectivamente, com base nos IDs fornecidos na URL.
-);
+    [InscricaoController::class, 'atualizarConferencia']
+)->middleware('auth:sanctum'); #Atualiza a conferência de uma inscrição específica, chamando o método atualizarConferencia do InscricaoController. Os parâmetros {inscricao} e {conferencia} serão resolvidos para instâncias dos modelos Inscricao e Conferencia, respectivamente, com base nos IDs fornecidos na URL. Esta rota requer autenticação via Sanctum.
 
 Route::put('/editais/{edital}', [EditalController::class, 'update']); #Atualiza a situação de um edital específico, chamando o método update do EditalController. O parâmetro {edital} será resolvido para uma instância do modelo Edital com base no ID fornecido na URL.
 
 Route::put(
     '/inscricoes/{inscricao}/analise',
-    [InscricaoController::class, 'atualizarAnalise'] #Atualiza a análise de uma inscrição específica, chamando o método atualizarAnalise do InscricaoController. O parâmetro {inscricao} será resolvido para uma instância do modelo Inscricao com base no ID fornecido na URL.
-);
+    [InscricaoController::class, 'atualizarAnalise']
+)->middleware('auth:sanctum'); #Atualiza a análise de uma inscrição específica, chamando o método atualizarAnalise do InscricaoController. O parâmetro {inscricao} será resolvido para uma instância do modelo Inscricao com base no ID fornecido na URL. Esta rota requer autenticação via Sanctum.
 
 Route::post('/editais', [EditalController::class, 'store']); #Cria um novo edital, chamando o método store do EditalController. Os dados do edital serão validados pelo CriarEditalRequest antes de serem processados pelo serviço de criação de editais.
 

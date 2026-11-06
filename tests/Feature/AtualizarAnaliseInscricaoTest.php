@@ -16,6 +16,15 @@ class AtualizarAnaliseInscricaoTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $usuarioSme = criarUsuarioSme();
+
+        $this->actingAs($usuarioSme, 'sanctum');
+    }
+
     private function criarCenario(
         string $situacaoEdital,
         string $situacaoInscricao,
@@ -223,7 +232,10 @@ class AtualizarAnaliseInscricaoTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame('ANALISE_INICIADA', $historico->acao);
-        $this->assertNull($historico->autor);
+        $this->assertSame(
+            (string) auth('sanctum')->id(),
+            $historico->autor
+        );
 
         $this->assertSame(
             [
@@ -266,7 +278,10 @@ class AtualizarAnaliseInscricaoTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame('ANALISE_CONCLUIDA', $historico->acao);
-        $this->assertNull($historico->autor);
+        $this->assertSame(
+            (string) auth('sanctum')->id(),
+            $historico->autor
+        );
 
         $this->assertSame(
             [
@@ -309,7 +324,10 @@ class AtualizarAnaliseInscricaoTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame('ANALISE_CONCLUIDA', $historico->acao);
-        $this->assertNull($historico->autor);
+        $this->assertSame(
+            (string) auth('sanctum')->id(),
+            $historico->autor
+        );
 
         $this->assertSame(
             [

@@ -146,7 +146,8 @@ test('um militar consegue criar uma inscrição com escolhas e conferências pen
 
     expect($historico)->not->toBeNull();
 
-    expect($historico->autor)->toBeNull();
+    expect($historico->autor)
+        ->toBe((string) auth('sanctum')->id());
     expect($historico->dados_anteriores)->toBeNull();
 
     expect($historico->dados_posteriores['inscricao_id'])
