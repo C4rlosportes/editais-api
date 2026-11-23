@@ -60,7 +60,12 @@ beforeEach(function () {
             $this->opms
         ),
     ];
+    // Autenticar os testes com uma conta da SME.
+    $this->usuarioSme = criarUsuarioSme();
+
+    $this->actingAs($this->usuarioSme, 'sanctum');
 });
+
 
 test('a SME consegue criar um edital com requisitos e destinos', function () {
     $response = $this->postJson(
@@ -123,7 +128,8 @@ test('a SME consegue criar um edital com requisitos e destinos', function () {
         ->first();
 
     expect($historico)->not->toBeNull();
-    expect($historico->autor)->toBeNull();
+    expect($historico->autor)
+        ->toBe((string) $this->usuarioSme->id);
     expect($historico->dados_anteriores)->toBeNull();
 
     expect($historico->dados_posteriores['codigo'])

@@ -40,6 +40,11 @@ beforeEach(function () {
         'opm_id' => $this->opm1->id,
         'vagas' => 2,
     ]);
+
+    // Autenticar os testes com uma conta da SME.
+    $this->usuarioSme = criarUsuarioSme();
+
+    $this->actingAs($this->usuarioSme, 'sanctum');
 });
 
 test('a SME consegue editar o conteúdo de um edital em rascunho', function () {
@@ -110,6 +115,15 @@ test('a SME consegue editar o conteúdo de um edital em rascunho', function () {
         'opm_id' => $this->opm2->id,
         'vagas' => 3,
     ]);
+    $historico = \App\Models\Historico::query()
+        ->where('edital_id', $this->edital->id)
+        ->where('acao', 'CONTEUDO_EDITAL_ATUALIZADO')
+        ->firstOrFail();
+
+    $this->assertSame(
+        (string) auth('sanctum')->id(),
+        $historico->autor
+    );
 });
 
 test('a SME não consegue editar o conteúdo de um edital aberto', function () {

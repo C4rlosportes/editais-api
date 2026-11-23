@@ -96,11 +96,11 @@ class InscricaoService
     }
 
     public function criar(
-    array $dados,
-    Edital $edital,
-    Militar $militar,
-    string $autor
-): Inscricao {
+        array $dados,
+        Edital $edital,
+        Militar $militar,
+        string $autor
+    ): Inscricao {
         # Função para criar uma inscrição, recebendo os dados validados, o edital e o militar.
 
         if ($edital->situacao !== 'ABERTO') {
@@ -190,10 +190,10 @@ class InscricaoService
     }
 
     public function atualizarAnalise(
-    int $inscricaoId,
-    string $novaSituacao,
-    string $autor
-): Inscricao {
+        int $inscricaoId,
+        string $novaSituacao,
+        string $autor
+    ): Inscricao {
         return DB::transaction(function () use (
             $inscricaoId,
             $novaSituacao,

@@ -39,23 +39,27 @@ Route::patch(
     [InscricaoController::class, 'atualizarConferencia']
 )->middleware('auth:sanctum'); #Atualiza a conferência de uma inscrição específica, chamando o método atualizarConferencia do InscricaoController. Os parâmetros {inscricao} e {conferencia} serão resolvidos para instâncias dos modelos Inscricao e Conferencia, respectivamente, com base nos IDs fornecidos na URL. Esta rota requer autenticação via Sanctum.
 
-Route::put('/editais/{edital}', [EditalController::class, 'update']); #Atualiza a situação de um edital específico, chamando o método update do EditalController. O parâmetro {edital} será resolvido para uma instância do modelo Edital com base no ID fornecido na URL.
+Route::put(
+    '/editais/{edital}',
+    [EditalController::class, 'update']
+)->middleware('auth:sanctum');
 
 Route::put(
     '/inscricoes/{inscricao}/analise',
     [InscricaoController::class, 'atualizarAnalise']
 )->middleware('auth:sanctum'); #Atualiza a análise de uma inscrição específica, chamando o método atualizarAnalise do InscricaoController. O parâmetro {inscricao} será resolvido para uma instância do modelo Inscricao com base no ID fornecido na URL. Esta rota requer autenticação via Sanctum.
 
-Route::post('/editais', [EditalController::class, 'store']); #Cria um novo edital, chamando o método store do EditalController. Os dados do edital serão validados pelo CriarEditalRequest antes de serem processados pelo serviço de criação de editais.
+Route::post(
+    '/editais',
+    [EditalController::class, 'store']
+)->middleware('auth:sanctum');
 
 Route::get('/opms', [OpmController::class, 'index']); #Lista as OPMs cadastradas, chamando o método index do OpmController.
 
 Route::put(
     '/editais/{edital}/conteudo',
     [EditalController::class, 'atualizarConteudo']
-); #Atualiza o conteúdo de um edital específico, chamando o método atualizarConteudo do EditalController. O parâmetro {edital} será resolvido para uma instância do modelo Edital com base no ID fornecido na URL. Os dados do edital serão validados pelo AtualizarEditalRequest antes de serem processados pelo serviço de atualização de editais.
+)->middleware('auth:sanctum');
 
-Route::get(
-    '/editais/{edital}/historico',
-    [HistoricoController::class, 'index']
-); #Lista o histórico de um edital específico, chamando o método index do HistoricoController. O parâmetro {edital} será resolvido para uma instância do modelo Edital com base no ID fornecido na URL.
+Route::get('/editais/{edital}/historico', [HistoricoController::class, 'index'])
+    ->middleware('auth:sanctum');

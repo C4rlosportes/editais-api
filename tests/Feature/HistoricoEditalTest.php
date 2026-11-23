@@ -1,13 +1,17 @@
+
 <?php
 
 use App\Models\Edital;
 use App\Models\Historico;
+use App\Models\Opm;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
 test('a API lista o historico do edital do mais recente para o mais antigo', function () {
+    $usuarioSme = criarUsuarioSme();
+
     $edital = Edital::create([
         'codigo' => 'EDITAL-HIST-001',
         'titulo' => 'Edital de Histórico',
@@ -70,9 +74,8 @@ test('a API lista o historico do edital do mais recente para o mais antigo', fun
             'created_at' => now()->subMinute(),
         ]);
 
-    $response = $this->getJson(
-        "/api/editais/{$edital->id}/historico"
-    );
+    $response = $this->actingAs($usuarioSme, 'sanctum')
+        ->getJson("/api/editais/{$edital->id}/historico");
 
     $response->assertOk()
         ->assertJsonCount(2, 'data')
@@ -114,6 +117,8 @@ test('a API lista o historico do edital do mais recente para o mais antigo', fun
 });
 
 test('a API retorna uma lista vazia quando o edital nao possui historico', function () {
+    $usuarioSme = criarUsuarioSme();
+
     $edital = Edital::create([
         'codigo' => 'EDITAL-HIST-VAZIO',
         'titulo' => 'Edital sem Histórico',
@@ -122,7 +127,8 @@ test('a API retorna uma lista vazia quando o edital nao possui historico', funct
         'situacao' => 'RASCUNHO',
     ]);
 
-    $this->getJson("/api/editais/{$edital->id}/historico")
+    $this->actingAs($usuarioSme, 'sanctum')
+        ->getJson("/api/editais/{$edital->id}/historico")
         ->assertOk()
         ->assertExactJson([
             'data' => [],
@@ -130,6 +136,44 @@ test('a API retorna uma lista vazia quando o edital nao possui historico', funct
 });
 
 test('a API retorna 404 ao consultar o historico de um edital inexistente', function () {
-    $this->getJson('/api/editais/999999/historico')
+    $usuarioSme = criarUsuarioSme();
+
+    $this->actingAs($usuarioSme, 'sanctum')
+        ->getJson('/api/editais/999999/historico')
         ->assertNotFound();
+});
+
+test('usuario nao autenticado nao pode consultar o historico', function () {
+    $edital = Edital::create([
+        'codigo' => 'EDITAL-HIST-SEM-AUTH',
+        'titulo' => 'Edital de teste',
+        'descricao' => 'Teste de acesso sem autenticação.',
+        'max_opcoes' => 2,
+        'situacao' => 'RASCUNHO',
+    ]);
+
+    $this->getJson("/api/editais/{$edital->id}/historico")
+        ->assertUnauthorized();
+});
+
+test('militar nao pode consultar o historico do edital', function () {
+    $opm = Opm::create([
+        'codigo' => 'OPM-HIST-' . str()->uuid(),
+        'nome' => 'OPM de teste do histórico',
+        'municipio' => 'Porto Alegre',
+    ]);
+
+    $contextoMilitar = criarUsuarioMilitar($opm);
+
+    $edital = Edital::create([
+        'codigo' => 'EDITAL-HIST-MILITAR',
+        'titulo' => 'Edital de teste',
+        'descricao' => 'Teste de acesso do militar.',
+        'max_opcoes' => 2,
+        'situacao' => 'RASCUNHO',
+    ]);
+
+    $this->actingAs($contextoMilitar['user'], 'sanctum')
+        ->getJson("/api/editais/{$edital->id}/historico")
+        ->assertForbidden();
 });
