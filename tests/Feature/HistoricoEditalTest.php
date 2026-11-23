@@ -177,3 +177,23 @@ test('militar nao pode consultar o historico do edital', function () {
         ->getJson("/api/editais/{$edital->id}/historico")
         ->assertForbidden();
 });
+
+test('a API retorna 401 em JSON sem autenticacao e sem cabecalho Accept', function () {
+    $edital = Edital::create([
+        'codigo' => 'EDITAL-HIST-SEM-ACCEPT',
+        'titulo' => 'Edital sem autenticação',
+        'descricao' => 'Teste de resposta sem cabeçalho Accept.',
+        'max_opcoes' => 2,
+        'situacao' => 'RASCUNHO',
+    ]);
+
+    // Usar get() em vez de getJson() para não enviar Accept: application/json.
+    $response = $this->get(
+        "/api/editais/{$edital->id}/historico"
+    );
+
+    $response->assertUnauthorized()
+        ->assertJson([
+            'message' => 'Unauthenticated.',
+        ]);
+});
