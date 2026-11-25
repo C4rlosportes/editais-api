@@ -14,9 +14,9 @@ class EditalService
     /**
      * Cria um edital com seus requisitos e destinos.
      */
-    public function criar(array $dados): Edital
+    public function criar(array $dados, string $autor): Edital
     {
-        return DB::transaction(function () use ($dados) {
+        return DB::transaction(function () use ($dados, $autor) {
             $requisitos = $dados['requisitos'];
             $destinos = $dados['destinos'];
 
@@ -55,7 +55,7 @@ class EditalService
             $this->historicoRepository->registrar(
                 $editalCriado->id,
                 'EDITAL_CRIADO',
-                null,
+                $autor,
                 null,
                 $dadosPosteriores
             );
@@ -69,9 +69,10 @@ class EditalService
      */
     public function atualizarConteudo(
         Edital $edital,
-        array $dados
+        array $dados,
+        string $autor
     ): Edital {
-        return DB::transaction(function () use ($edital, $dados) {
+        return DB::transaction(function () use ($edital, $dados, $autor) {
             $editalAtual = $this->editalRepository
                 ->buscarParaAtualizacao($edital->id);
 
@@ -137,7 +138,7 @@ class EditalService
             $this->historicoRepository->registrar(
                 $editalAtualizado->id,
                 'CONTEUDO_EDITAL_ATUALIZADO',
-                null,
+                $autor,
                 $dadosAnteriores,
                 $dadosPosteriores
             );
@@ -169,9 +170,10 @@ class EditalService
 
     public function atualizarSituacao(
         Edital $edital,
-        string $novaSituacao
+        string $novaSituacao,
+        string $autor
     ): Edital {
-        return DB::transaction(function () use ($edital, $novaSituacao) {
+        return DB::transaction(function () use ($edital, $novaSituacao, $autor) {
             $editalAtual = $this->editalRepository
                 ->buscarParaAtualizacao($edital->id);
 
@@ -208,7 +210,7 @@ class EditalService
             $this->historicoRepository->registrar(
                 $editalAtualizado->id,
                 'SITUACAO_ALTERADA',
-                null,
+                $autor,
                 [
                     'situacao' => $situacaoAnterior,
                 ],

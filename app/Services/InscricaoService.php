@@ -29,12 +29,14 @@ class InscricaoService
     public function atualizarConferencia(
         int $inscricaoId,
         int $conferenciaId,
-        array $dados
+        array $dados,
+        string $autor
     ): Conferencia {
         return DB::transaction(function () use (
             $inscricaoId,
             $conferenciaId,
-            $dados
+            $dados,
+            $autor
         ) {
             $inscricao = $this->inscricaoRepository->buscarParaAnalise(
                 $inscricaoId
@@ -84,7 +86,7 @@ class InscricaoService
             $this->historicoRepository->registrar(
                 $inscricao->edital_id,
                 'CONFERENCIA_ATUALIZADA',
-                null,
+                $autor,
                 $dadosAnteriores,
                 $dadosPosteriores
             );
@@ -96,7 +98,8 @@ class InscricaoService
     public function criar(
         array $dados,
         Edital $edital,
-        Militar $militar
+        Militar $militar,
+        string $autor
     ): Inscricao {
         # Função para criar uma inscrição, recebendo os dados validados, o edital e o militar.
 
@@ -132,7 +135,7 @@ class InscricaoService
             ]);
         }
 
-        return DB::transaction(function () use ($dados, $edital, $militar, $destinoIds) { #Inicia uma transação de banco de dados para garantir que todas as operações sejam concluídas com sucesso ou revertidas em caso de falha.
+        return DB::transaction(function () use ($dados, $edital, $militar, $destinoIds, $autor) { #Inicia uma transação de banco de dados para garantir que todas as operações sejam concluídas com sucesso ou revertidas em caso de falha.
 
             $inscricao = $this->inscricaoRepository->criarInscricao([
                 'protocolo' => 'INS-' . strtoupper(Str::random(12)),
@@ -177,7 +180,7 @@ class InscricaoService
             $this->historicoRepository->registrar(
                 $edital->id,
                 'INSCRICAO_CRIADA',
-                null,
+                $autor,
                 null,
                 $dadosPosteriores
             );
@@ -188,11 +191,13 @@ class InscricaoService
 
     public function atualizarAnalise(
         int $inscricaoId,
-        string $novaSituacao
+        string $novaSituacao,
+        string $autor
     ): Inscricao {
         return DB::transaction(function () use (
             $inscricaoId,
-            $novaSituacao
+            $novaSituacao,
+            $autor
         ) {
             $inscricao = $this->inscricaoRepository
                 ->buscarParaAnalise($inscricaoId);
@@ -227,7 +232,7 @@ class InscricaoService
                 $this->historicoRepository->registrar(
                     $edital->id,
                     'ANALISE_INICIADA',
-                    null,
+                    $autor,
                     $dadosAnteriores,
                     [
                         'inscricao_id' => $inscricaoAtualizada->id,
@@ -279,7 +284,7 @@ class InscricaoService
                 $this->historicoRepository->registrar(
                     $edital->id,
                     'ANALISE_CONCLUIDA',
-                    null,
+                    $autor,
                     $dadosAnteriores,
                     [
                         'inscricao_id' => $inscricaoAtualizada->id,

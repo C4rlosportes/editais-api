@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AtualizarEditalRequest;
+use App\Http\Requests\AtualizarSituacaoEditalRequest;
+use App\Http\Requests\CriarEditalRequest;
 use App\Http\Resources\EditalResource;
+use App\Models\Edital;
 use App\Services\EditalService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use App\Http\Requests\AtualizarSituacaoEditalRequest;
-use App\Models\Edital;
-use App\Http\Requests\CriarEditalRequest;
-use App\Http\Requests\AtualizarEditalRequest;
 
 class EditalController extends Controller
 {
@@ -19,14 +19,18 @@ class EditalController extends Controller
         CriarEditalRequest $request,
         EditalService $editalService
     ) {
+        $usuario = $request->user();
+
         $edital = $editalService->criar(
-            $request->validated()
+            $request->validated(),
+            (string) $usuario->id
         );
 
         return (new EditalResource($edital))
             ->response()
             ->setStatusCode(201);
     }
+
     /**
      * Lista os editais cadastrados.
      */
@@ -57,10 +61,13 @@ class EditalController extends Controller
         AtualizarEditalRequest $request,
         Edital $edital,
         EditalService $editalService
-    ): EditalResource {
+    ) {
+        $usuario = $request->user();
+
         $editalAtualizado = $editalService->atualizarConteudo(
             $edital,
-            $request->validated()
+            $request->validated(),
+            (string) $usuario->id
         );
 
         return new EditalResource($editalAtualizado);
@@ -70,10 +77,13 @@ class EditalController extends Controller
         AtualizarSituacaoEditalRequest $request,
         Edital $edital,
         EditalService $editalService
-    ): EditalResource {
+    ) {
+        $usuario = $request->user();
+
         $editalAtualizado = $editalService->atualizarSituacao(
             $edital,
-            $request->validated()['situacao']
+            $request->validated()['situacao'],
+            (string) $usuario->id
         );
 
         return new EditalResource($editalAtualizado);

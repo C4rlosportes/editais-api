@@ -14,6 +14,15 @@ class AtualizarSituacaoEditalTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $usuarioSme = criarUsuarioSme();
+
+        $this->actingAs($usuarioSme, 'sanctum');
+    }
+
     private function criarEdital(string $situacao): Edital
     {
         return Edital::create([
@@ -220,7 +229,11 @@ class AtualizarSituacaoEditalTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame('SITUACAO_ALTERADA', $historico->acao);
-        $this->assertNull($historico->autor);
+
+        $this->assertSame(
+            (string) auth('sanctum')->id(),
+            $historico->autor
+        );
 
         $this->assertSame(
             ['situacao' => 'RASCUNHO'],

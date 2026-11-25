@@ -70,6 +70,11 @@ beforeEach(function () {
 
     $this->inscricao = $inscricao;
     $this->conferencia = $conferencia;
+
+    // Autenticar os testes como usuário da SME.
+    $usuarioSme = criarUsuarioSme();
+
+    $this->actingAs($usuarioSme, 'sanctum');
 });
 
 test('a SME pode marcar uma conferência como ATENDE', function () {
@@ -403,7 +408,11 @@ test('registra historico ao atualizar uma conferencia', function () {
     );
 
     // O autor permanece nulo enquanto não há autenticação.
-    $this->assertNull($historico->autor);
+    // O histórico identifica o usuário SME autenticado.
+    $this->assertSame(
+        (string) auth('sanctum')->id(),
+        $historico->autor
+    );
 
     // Verificar os dados anteriores à atualização.
     $this->assertSame(

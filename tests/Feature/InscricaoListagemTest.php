@@ -92,9 +92,10 @@ test('a API lista somente as inscrições do edital solicitado', function () {
     ]);
 
     // 8. Consultar somente as inscrições do primeiro edital
-    $response = $this->getJson(
-        "/api/editais/{$edital->id}/inscricoes"
-    );
+    $usuarioSme = criarUsuarioSme();
+
+    $response = $this->actingAs($usuarioSme, 'sanctum')
+        ->getJson("/api/editais/{$edital->id}/inscricoes");
 
     // 9. Verificar a resposta e a quantidade de inscrições
     $response->assertOk()
@@ -106,4 +107,38 @@ test('a API lista somente as inscrições do edital solicitado', function () {
         ->assertJsonMissing([
             'protocolo' => 'INS-LISTA-003',
         ]);
+});
+
+test('a listagem de inscrições exige autenticação', function () {
+    $edital = Edital::create([
+        'codigo' => 'EDITAL-SEM-AUTH',
+        'titulo' => 'Edital sem autenticação',
+        'descricao' => 'Teste de autenticação.',
+        'max_opcoes' => 1,
+        'situacao' => 'ABERTO',
+    ]);
+
+    $this->getJson("/api/editais/{$edital->id}/inscricoes")
+        ->assertUnauthorized();
+});
+test('um militar não pode listar as inscrições de um edital', function () {
+    $opm = Opm::create([
+        'codigo' => 'OPM-LISTA-MILITAR',
+        'nome' => 'OPM de Teste',
+        'municipio' => 'Porto Alegre',
+    ]);
+
+    $contextoMilitar = criarUsuarioMilitar($opm);
+
+    $edital = Edital::create([
+        'codigo' => 'EDITAL-LISTA-MILITAR',
+        'titulo' => 'Edital para teste de autorização',
+        'descricao' => 'Teste de permissão.',
+        'max_opcoes' => 1,
+        'situacao' => 'ABERTO',
+    ]);
+
+    $this->actingAs($contextoMilitar['user'], 'sanctum')
+        ->getJson("/api/editais/{$edital->id}/inscricoes")
+        ->assertForbidden();
 });
