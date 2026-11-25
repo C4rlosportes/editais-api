@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AtualizarEditalRequest;
+use App\Http\Requests\AtualizarSituacaoEditalRequest;
+use App\Http\Requests\CriarEditalRequest;
 use App\Http\Resources\EditalResource;
+use App\Models\Edital;
 use App\Services\EditalService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use App\Http\Requests\AtualizarSituacaoEditalRequest;
-use App\Models\Edital;
-use App\Http\Requests\CriarEditalRequest;
-use App\Http\Requests\AtualizarEditalRequest;
 
 class EditalController extends Controller
 {
@@ -21,18 +21,6 @@ class EditalController extends Controller
     ) {
         $usuario = $request->user();
 
-        if (!$usuario) {
-            return response()->json([
-                'message' => 'Usuário não autenticado.',
-            ], 401);
-        }
-
-        if ($usuario->perfil_acesso !== 'SME') {
-            return response()->json([
-                'message' => 'Somente usuários da SME podem criar editais.',
-            ], 403);
-        }
-
         $edital = $editalService->criar(
             $request->validated(),
             (string) $usuario->id
@@ -42,6 +30,7 @@ class EditalController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
     /**
      * Lista os editais cadastrados.
      */
@@ -75,18 +64,6 @@ class EditalController extends Controller
     ) {
         $usuario = $request->user();
 
-        if (!$usuario) {
-            return response()->json([
-                'message' => 'Usuário não autenticado.',
-            ], 401);
-        }
-
-        if ($usuario->perfil_acesso !== 'SME') {
-            return response()->json([
-                'message' => 'Somente usuários da SME podem editar editais.',
-            ], 403);
-        }
-
         $editalAtualizado = $editalService->atualizarConteudo(
             $edital,
             $request->validated(),
@@ -102,18 +79,6 @@ class EditalController extends Controller
         EditalService $editalService
     ) {
         $usuario = $request->user();
-
-        if (!$usuario) {
-            return response()->json([
-                'message' => 'Usuário não autenticado.',
-            ], 401);
-        }
-
-        if ($usuario->perfil_acesso !== 'SME') {
-            return response()->json([
-                'message' => 'Somente usuários da SME podem alterar a situação dos editais.',
-            ], 403);
-        }
 
         $editalAtualizado = $editalService->atualizarSituacao(
             $edital,

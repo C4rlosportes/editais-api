@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Http\Requests\CriarInscricaoRequest;
-use App\Http\Requests\AtualizarConferenciaRequest;
 use App\Http\Requests\AtualizarAnaliseInscricaoRequest;
+use App\Http\Requests\AtualizarConferenciaRequest;
+use App\Http\Requests\CriarInscricaoRequest;
+use App\Http\Resources\ConferenciaResource;
+use App\Http\Resources\InscricaoResource;
 use App\Models\Edital;
 use App\Models\Inscricao;
 use App\Services\InscricaoService;
-use App\Http\Resources\InscricaoResource;
-use App\Http\Resources\ConferenciaResource;
+use Illuminate\Http\Request;
 
 class InscricaoController extends Controller
 {
@@ -19,18 +19,9 @@ class InscricaoController extends Controller
      * Somente usuários da SME podem realizar essa operação.
      */
     public function index(
-        Request $request,
         Edital $edital,
         InscricaoService $inscricaoService
     ) {
-        $usuario = $request->user();
-
-        if ($usuario->perfil_acesso !== 'SME') {
-            return response()->json([
-                'message' => 'Somente usuários da SME podem listar as inscrições.',
-            ], 403);
-        }
-
         $inscricoes = $inscricaoService->listarPorEdital($edital->id);
 
         return InscricaoResource::collection($inscricoes);
@@ -47,15 +38,9 @@ class InscricaoController extends Controller
     ) {
         $usuario = $request->user();
 
-        if ($usuario->perfil_acesso !== 'MILITAR') {
-            return response()->json([
-                'message' => 'Somente militares podem criar inscrições.',
-            ], 403);
-        }
-
         $militar = $usuario->militar;
 
-        if (!$militar) {
+        if (! $militar) {
             return response()->json([
                 'message' => 'A conta não está vinculada a um cadastro de militar.',
             ], 403);
@@ -95,7 +80,7 @@ class InscricaoController extends Controller
         if ($usuario->perfil_acesso === 'MILITAR') {
             $militar = $usuario->militar;
 
-            if (!$militar) {
+            if (! $militar) {
                 return response()->json([
                     'message' => 'A conta não está vinculada a um cadastro de militar.',
                 ], 403);
@@ -106,12 +91,7 @@ class InscricaoController extends Controller
                     'message' => 'Você não tem permissão para visualizar esta inscrição.',
                 ], 403);
             }
-        } elseif ($usuario->perfil_acesso !== 'SME') {
-            return response()->json([
-                'message' => 'Você não tem permissão para visualizar esta inscrição.',
-            ], 403);
         }
-
         $inscricao->load([
             'militar.opmOrigem',
             'edital',
@@ -133,12 +113,6 @@ class InscricaoController extends Controller
         InscricaoService $inscricaoService
     ) {
         $usuario = $request->user();
-
-        if ($usuario->perfil_acesso !== 'SME') {
-            return response()->json([
-                'message' => 'Somente usuários da SME podem atualizar conferências.',
-            ], 403);
-        }
 
         $conferenciaAtualizada = $inscricaoService->atualizarConferencia(
             $inscricao->id,
@@ -179,11 +153,6 @@ class InscricaoController extends Controller
     ) {
         $usuario = $request->user();
 
-        if ($usuario->perfil_acesso !== 'SME') {
-            return response()->json([
-                'message' => 'Somente usuários da SME podem atualizar análises.',
-            ], 403);
-        }
         $inscricaoAtualizada = $inscricaoService->atualizarAnalise(
             $inscricao->id,
             $request->validated()['situacao'],
