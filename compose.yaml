@@ -1,0 +1,54 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: editais-api-app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - type: volume
+        source: vendor
+        target: /var/www/html/vendor
+        volume:
+          nocopy: true
+    ports:
+      - "${DOCKER_APP_PORT:-8080}:8000"
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: pgsql
+      DB_PORT: 5432
+      DB_DATABASE: ${DOCKER_DB_DATABASE}
+      DB_USERNAME: ${DOCKER_DB_USERNAME}
+      DB_PASSWORD: ${DOCKER_DB_PASSWORD}
+    depends_on:
+      pgsql:
+        condition: service_healthy
+    command: >
+      sh -c "if [ ! -f vendor/autoload.php ]; then composer install --no-interaction; fi &&
+      php artisan serve --host=0.0.0.0 --port=8000 --no-reload"
+    restart: unless-stopped
+
+  pgsql:
+    image: postgres:17-alpine
+    container_name: editais-api-postgres
+    environment:
+      POSTGRES_DB: ${DOCKER_DB_DATABASE}
+      POSTGRES_USER: ${DOCKER_DB_USERNAME}
+      POSTGRES_PASSWORD: ${DOCKER_DB_PASSWORD}
+    ports:
+      - "${DOCKER_DB_PORT:-5433}:5432"
+    volumes:
+      - editais-api-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${DOCKER_DB_USERNAME} -d ${DOCKER_DB_DATABASE}
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  editais-api-postgres-data:
+  vendor:
