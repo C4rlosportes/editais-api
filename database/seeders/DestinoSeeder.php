@@ -24,7 +24,6 @@ class DestinoSeeder extends Seeder
                 'opm_id' => $opmBeta->id,
             ],
             [
-                'municipio' => $opmBeta->municipio,
                 'vagas' => 5,
             ]
         );
@@ -35,7 +34,6 @@ class DestinoSeeder extends Seeder
                 'opm_id' => $opmDelta->id,
             ],
             [
-                'municipio' => $opmDelta->municipio,
                 'vagas' => 3,
             ]
         );
@@ -46,7 +44,6 @@ class DestinoSeeder extends Seeder
                 'opm_id' => $opmZeta->id,
             ],
             [
-                'municipio' => $opmZeta->municipio,
                 'vagas' => 2,
             ]
         );
@@ -57,7 +54,6 @@ class DestinoSeeder extends Seeder
                 'opm_id' => $opmBeta->id,
             ],
             [
-                'municipio' => $opmBeta->municipio,
                 'vagas' => 4,
             ]
         );

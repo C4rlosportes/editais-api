@@ -26,6 +26,7 @@ Thumbs.db
 # Arquivos de ambiente locais
 .env.*
 !.env.example
+!.env.docker.example
 
 # Configuração local do Junie/MCP
 .junie/mcp/mcp.json

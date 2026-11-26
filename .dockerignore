@@ -1,0 +1,27 @@
+# Controle de versão
+.git
+.github
+
+# Arquivos de ambiente e credenciais
+.env
+.env.*
+!.env.example
+
+# Dependências instaladas localmente
+/vendor
+/node_modules
+
+# Arquivos gerados pelo frontend
+/public/build
+/public/hot
+/public/storage
+
+# Arquivos temporários e caches
+.phpunit.cache
+.phpunit.result.cache
+/storage/logs/*
+/storage/*.key
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
